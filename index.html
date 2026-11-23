@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PalletBot Simulator</title>
+<style>
+:root{--bg:#101923;--panel:#182633;--panel2:#203443;--text:#edf4f7;--muted:#a9bbc5;--accent:#e0a83e;--line:#344b5a;--green:#53a96b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,Segoe UI,Arial,sans-serif}
+main{max-width:1100px;margin:auto;padding:22px 16px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:clamp(25px,4vw,36px)}h2{margin:0 0 12px;font-size:21px}.muted{color:var(--muted);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}.robot{width:100%;max-height:250px}
+label{display:block;font-size:14px;margin:10px 0 5px}select{width:100%;background:#0f1b24;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px}
+button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-weight:650;cursor:pointer}
+button:hover{filter:brightness(1.15)}button.primary{background:var(--accent);color:#1d2529;border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}.wide{width:100%;margin-top:12px}.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.stat{background:#0f1b24;border-radius:10px;padding:10px}.stat small{display:block;color:var(--muted)}.stat b{font-size:20px}
+.bar{height:7px;background:#344b5a;border-radius:8px;overflow:hidden;margin-top:5px}.bar div{height:100%;width:100%;background:var(--green)}
+canvas{display:block;width:100%;height:auto;border-radius:10px;background:#e7eee5;touch-action:none}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.notice{padding:11px;background:#0f1b24;border-radius:9px;font-size:14px}
+kbd{border:1px solid #71838c;border-radius:5px;padding:1px 6px;font-size:12px}
+@media(max-width:580px){main{padding:14px 10px}.stats{grid-template-columns:repeat(2,1fr)}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div><h1>PALLETBOT <span style="color:var(--accent)">SIMULATOR</span></h1><div class="muted">Simulador 2D de transporte de pallets · Proyecto de diseño</div></div><div class="muted" id="controllerStatus">⌨ Teclado listo · Mando no detectado</div></header>
+
+<section id="menu">
+ <div class="panel">
+  <h2>Conoce tu PalletBot</h2>
+  <div class="grid">
+   <svg class="robot" viewBox="0 0 440 230" role="img" aria-label="Vista superior conceptual del PalletBot">
+    <rect x="100" y="45" width="250" height="140" rx="22" fill="#718b9b" stroke="#263f4d" stroke-width="4"/>
+    <rect x="137" y="64" width="176" height="100" rx="12" fill="#b7c8ce"/><rect x="171" y="86" width="108" height="56" rx="8" fill="#294b5b"/>
+    <text x="225" y="120" text-anchor="middle" fill="white" font-size="17" font-weight="bold">PALLETBOT</text>
+    <g fill="#202a30"><rect x="112" y="22" width="48" height="25" rx="7"/><rect x="290" y="22" width="48" height="25" rx="7"/><rect x="105" y="185" width="40" height="25" rx="7"/><rect x="165" y="185" width="40" height="25" rx="7"/><rect x="235" y="185" width="40" height="25" rx="7"/><rect x="295" y="185" width="40" height="25" rx="7"/></g>
+    <g fill="#e0a83e" stroke="#75531d" stroke-width="2"><rect x="12" y="80" width="125" height="13" rx="4"/><rect x="12" y="139" width="125" height="13" rx="4"/></g>
+    <text x="225" y="16" text-anchor="middle" fill="currentColor" font-size="11">Parte trasera</text><text x="15" y="70" fill="currentColor" font-size="11">Horquillas</text>
+   </svg>
+   <div>
+    <p><b>Robot compacto para mover pallets.</b> Esta simulación permite practicar la conducción, recogida, elevación y entrega en una bodega virtual.</p>
+    <p>🛞 Seis ruedas representadas: dos delanteras motrices/direccionales y cuatro traseras de apoyo.</p>
+    <p>⬆️ Debes elevar las horquillas al menos 30 mm antes de transportar la carga.</p>
+    <p>🔋 La batería se consume durante el trabajo. Visita el centro de carga para recargar.</p>
+    <p class="muted">Modelo conceptual. Las dimensiones, capacidades, velocidad y batería del juego no certifican el diseño físico.</p>
+   </div>
+  </div>
+ </div>
+ <div class="panel">
+  <h2>Configurar simulación</h2>
+  <div class="grid">
+   <div><label for="difficulty">Dificultad</label><select id="difficulty"><option value="easy">Fácil · pasillos amplios</option><option value="normal" selected>Normal · obstáculos</option><option value="hard">Difícil · pasillos estrechos</option></select></div>
+   <div><label for="speed">Velocidad máxima</label><select id="speed"><option value="1">Lenta</option><option value="1.5" selected>Media</option><option value="2">Rápida</option></select></div>
+   <div><label for="loadCount">Cantidad de pallets</label><select id="loadCount"><option>3</option><option selected>5</option><option>8</option></select></div>
+  </div>
+  <button class="primary wide" id="start">▶ Comenzar simulación</button>
+ </div>
+ <div class="panel">
+  <h2>Controles</h2>
+  <div class="grid">
+   <div><kbd>W</kbd> / <kbd>↑</kbd> Avanzar</div><div><kbd>S</kbd> / <kbd>↓</kbd> Retroceder</div>
+   <div><kbd>A</kbd> / <kbd>←</kbd> Girar izquierda</div><div><kbd>D</kbd> / <kbd>→</kbd> Girar derecha</div>
+   <div><kbd>E</kbd> Elevar horquillas</div><div><kbd>Q</kbd> Bajar horquillas</div>
+   <div><kbd>Espacio</kbd> Recoger / entregar</div><div><kbd>R</kbd> Reiniciar posición</div>
+  </div>
+  <p class="muted">Mando PS4 compatible mediante la API Gamepad del navegador: stick izquierdo para conducir, X para elevar, círculo para bajar y cuadrado para recoger/entregar. Conecta el mando por USB o Bluetooth y pulsa un botón para activarlo.</p>
+ </div>
+</section>
+
+<section id="game" class="hidden">
+ <div class="stats">
+  <div class="stat"><small>Pallets entregados</small><b id="delivered">0/5</b></div>
+  <div class="stat"><small>Batería</small><b id="batteryText">100%</b><div class="bar"><div id="batteryBar"></div></div></div>
+  <div class="stat"><small>Elevación</small><b id="forkText">0 mm</b></div>
+  <div class="stat"><small>Tiempo</small><b id="timeText">00:00</b></div>
+ </div>
+ <div class="panel" style="padding:8px"><canvas id="world" width="960" height="600" aria-label="Bodega y robot PalletBot"></canvas></div>
+ <div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b id="mission">Misión: recoge y entrega los pallets</b><span class="muted" id="speedText">0 m/s</span></div>
+  <p class="notice" id="message" aria-live="polite">Acércate a un pallet con las horquillas orientadas hacia él.</p>
+  <div class="controls">
+   <button id="raise" class="primary">⬆ Elevar</button><button id="lower">⬇ Bajar</button><button id="interact">□ Recoger / entregar</button>
+   <button id="reset">↺ Reiniciar robot</button><button id="pause">Ⅱ Pausar</button><button id="exit">Salir al menú</button>
+  </div>
+  <p class="muted">Recogida: acércate por el lado de las horquillas y pulsa □. Eleva al menos 30 mm. Entrega: llega a la zona verde, baja las horquillas y pulsa □.</p>
+ </div>
+ <div class="panel"><b>Centro de carga</b><p id="dockInfo" class="muted">El punto azul recarga la batería cuando el robot está dentro y detenido.</p></div>
+</section>
+<section id="result" class="panel hidden" style="text-align:center">
+ <h2 id="resultTitle">¡Misión completada!</h2><p id="resultText" class="muted"></p><button class="primary" id="again">Volver al menú</button>
+</section>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d'),W=960,H=600;
+let running=false,paused=false,raf=0,last=0,keys={},robot,pallets=[],walls=[],zone={x:820,y:500,w:100,h:65},dock={x:55,y:55},total=5,delivered=0,battery=100,fork=0,load=null,elapsed=0,collisions=0,actionLock=false;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),say=t=>$('message').textContent=t;
+function setup(){
+ robot={x:100,y:520,a:-Math.PI/2,v:0};fork=0;load=null;delivered=0;battery=100;elapsed=0;collisions=0;actionLock=false;
+ walls=[{x:245,y:100,w:30,h:175},{x:245,y:385,w:30,h:145},{x:465,y:25,w:30,h:165},{x:465,y:290,w:30,h:270},{x:690,y:90,w:30,h:165},{x:690,y:370,w:30,h:175},{x:110,y:290,w:95,h:22},{x:800,y:290,w:90,h:22}];
+ if($('difficulty').value==='easy')walls=walls.filter((_,i)=>i%2===0);
+ if($('difficulty').value==='hard')walls.push({x:350,y:225,w:28,h:135},{x:570,y:195,w:28,h:135},{x:830,y:35,w:25,h:160});
+ const spots=[[155,110],[365,220],[570,85],[815,355],[365,485],[570,500],[120,355],[850,145]];
+ pallets=spots.slice(0,total).map((p,i)=>({x:p[0],y:p[1],id:i+1,delivered:false}));
+ $('delivered').textContent='0/'+total;$('batteryText').textContent='100%';$('batteryBar').style.width='100%';$('forkText').textContent='0 mm';$('timeText').textContent='00:00';$('dockInfo').textContent='Punto azul: permanece dentro y detente para recargar.';say('Busca un pallet y alinea las horquillas.');
+}
+function front(){return{x:robot.x+Math.cos(robot.a)*48,y:robot.y+Math.sin(robot.a)*48};}
+function nearDock(){return Math.hypot(robot.x-dock.x,robot.y-dock.y)<65;}
+function nearZone(){return robot.x>zone.x-50&&robot.x<zone.x+zone.w+35&&robot.y>zone.y-45&&robot.y<zone.y+zone.h+45;}
+function rectHit(x,y,r,o){const xx=clamp(x,o.x,o.x+o.w),yy=clamp(y,o.y,o.y+o.h);return Math.hypot(x-xx,y-yy)<r;}
+function interact(){
+ if(!running||paused)return;
+ if(load){if(fork>8){say('Baja las horquillas antes de entregar el pallet.');return;}if(!nearZone()){say('Lleva el pallet hasta la zona verde.');return;}load.delivered=true;load=null;delivered++;$('delivered').textContent=delivered+'/'+total;if(delivered===total){finish();return;}say('¡Pallet entregado! Busca el siguiente.');}
+ else{if(fork>8){say('Baja las horquillas para introducirlas debajo del pallet.');return;}const f=front(),p=pallets.find(p=>!p.delivered&&dist(f,p)<52);if(!p){say('Acércate más al pallet y alinea las horquillas.');return;}load=p;say('Pallet recogido. Eleva las horquillas al menos 30 mm antes de moverte.');}
+}
+function resetRobot(){if(load){load.x=robot.x+Math.cos(robot.a)*55;load.y=robot.y+Math.sin(robot.a)*55;load=null;}robot={x:100,y:520,a:-Math.PI/2,v:0};fork=0;$('forkText').textContent='0 mm';say('Robot reiniciado. La carga quedó en el suelo.');}
+function pallet(x,y){ctx.save();ctx.translate(x,y);ctx.fillStyle='#986a3a';ctx.fillRect(-25,-19,50,38);ctx.strokeStyle='#5f411f';ctx.lineWidth=2;ctx.strokeRect(-25,-19,50,38);ctx.fillStyle='#d9bd8e';ctx.fillRect(-18,-13,36,26);ctx.fillStyle='#76512b';ctx.fillRect(-14,-19,5,38);ctx.fillRect(9,-19,5,38);ctx.restore();}
+function draw(){
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#e8eee5';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#d5ded3';ctx.lineWidth=1;
+ for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ ctx.fillStyle='#d2e8d4';ctx.fillRect(zone.x,zone.y,zone.w,zone.h);ctx.strokeStyle='#39834d';ctx.lineWidth=3;ctx.strokeRect(zone.x,zone.y,zone.w,zone.h);ctx.fillStyle='#225e37';ctx.font='bold 15px sans-serif';ctx.fillText('ENTREGA',zone.x+13,zone.y+36);
+ ctx.fillStyle='#b7d7e8';ctx.beginPath();ctx.arc(dock.x,dock.y,42,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#327b9d';ctx.stroke();ctx.fillStyle='#20536b';ctx.font='bold 12px sans-serif';ctx.fillText('CARGA',dock.x-20,dock.y+4);
+ walls.forEach(o=>{ctx.fillStyle='#7e8b91';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillStyle='#65737a';ctx.fillRect(o.x+4,o.y+4,o.w-8,o.h-8);});
+ pallets.forEach(p=>{if(!p.delivered&&p!==load)pallet(p.x,p.y);});if(load)pallet(robot.x+Math.cos(robot.a)*55,robot.y+Math.sin(robot.a)*55);
+ ctx.save();ctx.translate(robot.x,robot.y);ctx.rotate(robot.a);ctx.fillStyle='#202a30';[[-19,-28],[-19,28],[9,-28],[9,28],[26,-24],[26,24]].forEach(([x,y])=>ctx.fillRect(x-7,y-10,14,20));ctx.fillStyle='#64899b';ctx.strokeStyle='#294655';ctx.lineWidth=3;ctx.fillRect(-29,-23,58,46);ctx.strokeRect(-29,-23,58,46);ctx.fillStyle='#d6aa4d';ctx.fillRect(27,-17,36,6);ctx.fillRect(27,11,36,6);ctx.fillStyle='#243f4e';ctx.font='bold 10px sans-serif';ctx.fillText('PB',-9,4);ctx.restore();
+ ctx.fillStyle='#334a3a';ctx.font='12px sans-serif';ctx.fillText('Pallets · Obstáculos · Centro de carga · Entrega',15,585);
+}
+function finish(){running=false;cancelAnimationFrame(raf);$('game').classList.add('hidden');$('result').classList.remove('hidden');$('resultTitle').textContent='¡Misión completada!';$('resultText').textContent='Entregaste '+delivered+' pallets en '+$('timeText').textContent+'. Colisiones: '+collisions+'.';}
+function tick(t){
+ if(!running)return;const dt=Math.min((t-last)/1000||0,.04);last=t;
+ if(!paused){
+  elapsed+=dt;let pad=Array.from(navigator.getGamepads?navigator.getGamepads():[]).find(Boolean);
+  let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0),turn=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),up=!!keys.e,down=!!keys.q,act=!!keys[' '];
+  if(pad){if(Math.abs(pad.axes[1]||0)>.18)f=-pad.axes[1];if(Math.abs(pad.axes[0]||0)>.18)turn=pad.axes[0];up=up||!!pad.buttons[0]?.pressed;down=down||!!pad.buttons[1]?.pressed;act=act||!!pad.buttons[2]?.pressed;$('controllerStatus').textContent='🎮 '+pad.id.slice(0,35);}else $('controllerStatus').textContent='⌨ Teclado · Mando no detectado';
+  if(up)fork=clamp(fork+55*dt,0,100);if(down)fork=clamp(fork-55*dt,0,100);$('forkText').textContent=Math.round(fork)+' mm';
+  if(act&&!actionLock){interact();actionLock=true;}if(!act)actionLock=false;
+  if(load&&fork<30){robot.v=0;if(Math.abs(f)>.1)say('¡Eleva la carga al menos 30 mm para transportarla!');}
+  else{const max=Number($('speed').value);robot.v+=(f*max-robot.v)*Math.min(1,dt*4);robot.a+=turn*2.2*dt*(Math.abs(robot.v)>.03?Math.sign(robot.v):1);const ox=robot.x,oy=robot.y;robot.x=clamp(robot.x+Math.cos(robot.a)*robot.v*dt*65,25,935);robot.y=clamp(robot.y+Math.sin(robot.a)*robot.v*dt*65,25,575);if(walls.some(o=>rectHit(robot.x,robot.y,24,o))){robot.x=ox;robot.y=oy;robot.v=0;collisions++;say('¡Has tocado un obstáculo! Retrocede y busca otra trayectoria.');}}
+  if(nearDock()&&!load&&Math.abs(robot.v)<.15){battery=clamp(battery+22*dt,0,100);$('dockInfo').textContent='Recargando batería. Permanece en la zona azul.';}else{battery=clamp(battery-(.10+Math.abs(robot.v)*.11+(load?.15:0))*dt,0,100);if(battery<25)$('dockInfo').textContent='¡Batería baja! Regresa al centro de carga.';}
+  if(battery<=0){paused=true;robot.v=0;say('Batería agotada. Reinicia la simulación.');}
+  $('batteryText').textContent=Math.round(battery)+'%';$('batteryBar').style.width=battery+'%';$('timeText').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');if(elapsed>0&&Math.floor(elapsed/60)!==Math.floor((elapsed-dt)/60)&&!nearDock())say('Recuerda visitar el centro de carga periódicamente.');
+  $('speedText').textContent=(Math.abs(robot.v)*.01).toFixed(2)+' m/s · '+collisions+' choques';
+ }
+ draw();raf=requestAnimationFrame(tick);
+}
+$('start').addEventListener('click',()=>{total=Number($('loadCount').value);setup();$('menu').classList.add('hidden');$('result').classList.add('hidden');$('game').classList.remove('hidden');running=true;paused=false;$('pause').textContent='Ⅱ Pausar';last=performance.now();draw();raf=requestAnimationFrame(tick);});
+function holdButton(id,key){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true;});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));}
+holdButton('raise','e');holdButton('lower','q');$('interact').addEventListener('click',interact);$('reset').addEventListener('click',resetRobot);
+$('pause').addEventListener('click',()=>{paused=!paused;$('pause').textContent=paused?'▶ Continuar':'Ⅱ Pausar';last=performance.now();});
+$('exit').addEventListener('click',()=>{running=false;cancelAnimationFrame(raf);$('game').classList.add('hidden');$('menu').classList.remove('hidden');});
+$('again').addEventListener('click',()=>{$('result').classList.add('hidden');$('menu').classList.remove('hidden');});
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='r'&&running)resetRobot();});
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);window.addEventListener('blur',()=>keys={});
+setup();draw();
+})();
+</script>
+</body>
+</html>
