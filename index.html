@@ -32,13 +32,50 @@ kbd{border:1px solid #71838c;border-radius:5px;padding:1px 6px;font-size:12px}
   <h2>Conoce tu PalletBot</h2>
   <div class="grid">
    <svg class="robot" viewBox="0 0 440 230" role="img" aria-label="Vista superior conceptual del PalletBot">
-    <rect x="100" y="45" width="250" height="140" rx="22" fill="#718b9b" stroke="#263f4d" stroke-width="4"/>
-    <rect x="137" y="64" width="176" height="100" rx="12" fill="#b7c8ce"/><rect x="171" y="86" width="108" height="56" rx="8" fill="#294b5b"/>
-    <text x="225" y="120" text-anchor="middle" fill="white" font-size="17" font-weight="bold">PALLETBOT</text>
-    <g fill="#202a30"><rect x="112" y="22" width="48" height="25" rx="7"/><rect x="290" y="22" width="48" height="25" rx="7"/><rect x="105" y="185" width="40" height="25" rx="7"/><rect x="165" y="185" width="40" height="25" rx="7"/><rect x="235" y="185" width="40" height="25" rx="7"/><rect x="295" y="185" width="40" height="25" rx="7"/></g>
-    <g fill="#e0a83e" stroke="#75531d" stroke-width="2"><rect x="12" y="80" width="125" height="13" rx="4"/><rect x="12" y="139" width="125" height="13" rx="4"/></g>
-    <text x="225" y="16" text-anchor="middle" fill="currentColor" font-size="11">Parte trasera</text><text x="15" y="70" fill="currentColor" font-size="11">Horquillas</text>
-   </svg>
+    
+<svg class="robot" viewBox="0 0 440 230" role="img" aria-label="Vista superior de PalletBot con cuatro ruedas pequeñas delanteras y dos ruedas grandes traseras">
+  <!-- Horquillas delanteras -->
+  <g fill="#e0a83e" stroke="#805c25" stroke-width="2">
+    <rect x="12" y="80" width="125" height="13" rx="4"/>
+    <rect x="12" y="139" width="125" height="13" rx="4"/>
+  </g>
+
+  <!-- Chasis principal -->
+  <rect x="100" y="45" width="250" height="140" rx="22"
+        fill="#718b9b" stroke="#263f4d" stroke-width="4"/>
+
+  <!-- Cubierta del chasis -->
+  <rect x="137" y="64" width="176" height="100" rx="12"
+        fill="#b7c8ce"/>
+
+  <!-- Cerebro y electrónica -->
+  <rect x="171" y="86" width="108" height="56" rx="8"
+        fill="#294b5b"/>
+  <text x="225" y="120" text-anchor="middle"
+        fill="white" font-size="17" font-weight="bold">PALLETBOT</text>
+
+  <!-- Cuatro ruedas pequeñas delanteras -->
+  <g fill="#29343b">
+    <rect x="105" y="24" width="30" height="19" rx="8"/>
+    <rect x="145" y="24" width="30" height="19" rx="8"/>
+    <rect x="105" y="186" width="30" height="19" rx="8"/>
+    <rect x="145" y="186" width="30" height="19" rx="8"/>
+  </g>
+
+  <!-- Dos ruedas grandes traseras -->
+  <g fill="#17232b">
+    <rect x="290" y="14" width="48" height="33" rx="12"/>
+    <rect x="290" y="183" width="48" height="33" rx="12"/>
+  </g>
+
+  <!-- Indicaciones -->
+  <text x="80" y="16" text-anchor="middle"
+        fill="currentColor" font-size="11">Parte delantera</text>
+  <text x="320" y="16" text-anchor="middle"
+        fill="currentColor" font-size="11">Parte trasera</text>
+  <text x="15" y="70" fill="currentColor" font-size="11">Horquillas</text>
+</svg>
+
    <div>
     <p><b>Robot compacto para mover pallets.</b> Esta simulación permite practicar la conducción, recogida, elevación y entrega en una bodega virtual.</p>
     <p>🛞 Seis ruedas representadas: dos delanteras motrices/direccionales y cuatro traseras de apoyo.</p>
@@ -125,11 +162,9 @@ function draw(){
  ctx.fillStyle='#b7d7e8';ctx.beginPath();ctx.arc(dock.x,dock.y,42,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#327b9d';ctx.stroke();ctx.fillStyle='#20536b';ctx.font='bold 12px sans-serif';ctx.fillText('CARGA',dock.x-20,dock.y+4);
  walls.forEach(o=>{ctx.fillStyle='#7e8b91';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillStyle='#65737a';ctx.fillRect(o.x+4,o.y+4,o.w-8,o.h-8);});
  pallets.forEach(p=>{if(!p.delivered&&p!==load)pallet(p.x,p.y);});if(load)pallet(robot.x+Math.cos(robot.a)*55,robot.y+Math.sin(robot.a)*55);
- ctx.save();ctx.translate(robot.x,robot.y);ctx.rotate(robot.a);// 2 ruedas grandes traseras (zona del ESP32)
-ctx.fillStyle='#17232b';
-[[-18,-20],[-18,20]].forEach(([x,y])=>{
-  ctx.fillRect(x-9,y-13,18,26);
-});
+ ctx.save();ctx.translate(robot.x,robot.y);ctx.rotate(robot.a);ctx.fillStyle='#17232b';
+                                                                [[-18,-20],[-18,20]].forEach(([x,y])=>{
+                                                                   ctx.fillRect(x-9,y-13,18,26);});
 
 // 4 ruedas pequeñas delanteras (zona de horquillas)
 ctx.fillStyle='#394a52';
