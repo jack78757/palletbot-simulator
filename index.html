@@ -125,7 +125,17 @@ function draw(){
  ctx.fillStyle='#b7d7e8';ctx.beginPath();ctx.arc(dock.x,dock.y,42,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#327b9d';ctx.stroke();ctx.fillStyle='#20536b';ctx.font='bold 12px sans-serif';ctx.fillText('CARGA',dock.x-20,dock.y+4);
  walls.forEach(o=>{ctx.fillStyle='#7e8b91';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillStyle='#65737a';ctx.fillRect(o.x+4,o.y+4,o.w-8,o.h-8);});
  pallets.forEach(p=>{if(!p.delivered&&p!==load)pallet(p.x,p.y);});if(load)pallet(robot.x+Math.cos(robot.a)*55,robot.y+Math.sin(robot.a)*55);
- ctx.save();ctx.translate(robot.x,robot.y);ctx.rotate(robot.a);ctx.fillStyle='#202a30';[[-19,-28],[-19,28],[9,-28],[9,28],[26,-24],[26,24]].forEach(([x,y])=>ctx.fillRect(x-7,y-10,14,20));ctx.fillStyle='#64899b';ctx.strokeStyle='#294655';ctx.lineWidth=3;ctx.fillRect(-29,-23,58,46);ctx.strokeRect(-29,-23,58,46);ctx.fillStyle='#d6aa4d';ctx.fillRect(27,-17,36,6);ctx.fillRect(27,11,36,6);ctx.fillStyle='#243f4e';ctx.font='bold 10px sans-serif';ctx.fillText('PB',-9,4);ctx.restore();
+ ctx.save();ctx.translate(robot.x,robot.y);ctx.rotate(robot.a);// 2 ruedas grandes traseras (zona del ESP32)
+ctx.fillStyle='#17232b';
+[[-18,-20],[-18,20]].forEach(([x,y])=>{
+  ctx.fillRect(x-9,y-13,18,26);
+});
+
+// 4 ruedas pequeñas delanteras (zona de horquillas)
+ctx.fillStyle='#394a52';
+[[9,-20],[9,20],[23,-20],[23,20]].forEach(([x,y])=>{
+  ctx.fillRect(x-5,y-7,10,14);
+});ctx.fillStyle='#64899b';ctx.strokeStyle='#294655';ctx.lineWidth=3;ctx.fillRect(-29,-23,58,46);ctx.strokeRect(-29,-23,58,46);ctx.fillStyle='#d6aa4d';ctx.fillRect(27,-17,36,6);ctx.fillRect(27,11,36,6);ctx.fillStyle='#243f4e';ctx.font='bold 10px sans-serif';ctx.fillText('PB',-9,4);ctx.restore();
  ctx.fillStyle='#334a3a';ctx.font='12px sans-serif';ctx.fillText('Pallets · Obstáculos · Centro de carga · Entrega',15,585);
 }
 function finish(){running=false;cancelAnimationFrame(raf);$('game').classList.add('hidden');$('result').classList.remove('hidden');$('resultTitle').textContent='¡Misión completada!';$('resultText').textContent='Entregaste '+delivered+' pallets en '+$('timeText').textContent+'. Colisiones: '+collisions+'.';}
